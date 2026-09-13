@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trilingual Particle & Grammar Engine</title>
+  <title>Trilingual Grammar Interactive Tester</title>
   <style>
     :root {
       --bg-color: #0b0f19;
@@ -14,6 +14,7 @@
       --accent-pao: #10b981;
       --accent-my: #f59e0b;
       --accent-en: #3b82f6;
+      --input-bg: #121829;
     }
 
     body {
@@ -27,16 +28,78 @@
 
     .container { max-width: 900px; width: 100%; }
     header { text-align: center; margin-bottom: 25px; }
+    
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       background: linear-gradient(135deg, #a7f3d0, #3b82f6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
     }
 
-    .card {
+    /* Interactive Input Panel */
+    .input-card {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    input, select {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-en);
+    }
+
+    button.btn-parse {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button.btn-parse:hover { opacity: 0.9; }
+
+    /* Results Layout */
+    .card {
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 18px;
@@ -47,15 +110,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       border-bottom: 1px solid var(--card-border);
       padding-bottom: 8px;
     }
 
     .badge {
       font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
       font-weight: bold;
     }
 
@@ -65,11 +128,12 @@
 
     pre {
       background: #050811;
-      padding: 12px;
-      border-radius: 6px;
+      padding: 14px;
+      border-radius: 8px;
       color: #e5e7eb;
       font-size: 1.05rem;
-      margin: 5px 0;
+      margin: 0;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -77,94 +141,115 @@
 
   <div class="container">
     <header>
-      <h1>Trilingual Grammar & Particle Engine</h1>
-      <p style="color: var(--text-muted);">Functional Markers & Functional Suffix Resolution</p>
+      <h1>Multilingual Grammar Engine</h1>
+      <p style="color: var(--text-muted);">Interactive Linguistic Sandbox (Pa'O • Myanmar • English)</p>
     </header>
 
-    <div id="output">Loading Engine...</div>
+    <!-- Interactive Input Control -->
+    <div class="input-card">
+      <div class="form-grid">
+        <div class="input-group">
+          <label>Subject (ကတ္တား)</label>
+          <input type="text" id="subjInput" value="ခွေ / ကျွန်တော် / I">
+        </div>
+
+        <div class="input-group">
+          <label>Verb (ကြိယာ)</label>
+          <input type="text" id="verbInput" value="အံႏ / စားသည် / eat">
+        </div>
+
+        <div class="input-group">
+          <label>Object (ကံ)</label>
+          <input type="text" id="objInput" value="ဒဲဉ် / ထမင်း / rice">
+        </div>
+
+        <div class="input-group">
+          <label>Object Particle (ကံဝိဘတ်)</label>
+          <select id="particleInput">
+            <option value="NONE">None (မပါပါ)</option>
+            <option value="ACCUSATIVE">ကို / ယို (Accusative)</option>
+            <option value="TOPIC">သည် / နဝ်ꩻ (Topic)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-parse" id="parseBtn">Analyze & Transform Syntax</button>
+    </div>
+
+    <!-- Output Container -->
+    <div id="output"></div>
   </div>
 
   <script type="module">
-    class ParticleGrammarRealizer {
-      // Nominalizer Transformer (လုပ် + ခြင်း)
-      realizeNominalization(verbEntry, markerEntry) {
-        const myVerb = verbEntry.my.text; // လုပ်
-        const myMarker = markerEntry.my.marker; // ခြင်း
-        
-        const paoVerb = verbEntry.pao.text; // မာꩻ
-        const paoMarker = markerEntry.pao.marker; // ထာꩻ
-        
-        const enVerb = verbEntry.en.text; // do
-        const enSuffix = markerEntry.en.suffix; // ing
+    class SyntaxEngine {
+      parse(subj, verb, obj, particle) {
+        // Particle Resolution mapping
+        let myPart = particle === 'ACCUSATIVE' ? 'ကို' : (particle === 'TOPIC' ? 'သည်' : '');
+        let paoPart = particle === 'ACCUSATIVE' ? 'ယို' : (particle === 'TOPIC' ? 'နဝ်ꩻ' : '');
 
         return {
-          my: `${myVerb}${myMarker}`,                          // လုပ်ခြင်း (AFTER_VERB)
-          pao: `${paoMarker} ${paoVerb}`,                      // ထာꩻ မာꩻ (BEFORE_VERB)
-          en: `${enVerb}${enSuffix}`                           // doing (ATTACH_SUFFIX)
+          pao: {
+            order: "SVO",
+            pattern: "[S] Subject → [V] Verb → [O] Object + [P] Particle",
+            text: `${subj} ${verb} ${obj} ${paoPart}`.trim()
+          },
+          my: {
+            order: "SOV",
+            pattern: "[S] Subject → [O] Object + [P] Particle → [V] Verb",
+            text: `${subj} ${obj}${myPart} ${verb}`.trim()
+          },
+          en: {
+            order: "SVO",
+            pattern: "[S] Subject → [V] Verb → [O] Object",
+            text: `${subj} ${verb} ${obj}`.trim()
+          }
         };
       }
-
-      // Sentence Realizer with Object Markers
-      realizeSentence(subj, verb, obj, objParticle, verbMarker, lexicons) {
-        const s = lexicons.nouns[subj];
-        const v = lexicons.verbs[verb];
-        const o = lexicons.nouns[obj];
-        const p = lexicons.particles[objParticle];
-        const vm = lexicons.verbMarkers[verbMarker];
-
-        // Myanmar (SOV): S + O + ObjMarker + V + VerbMarker
-        const myStr = `${s.my.text} ${o.my.text}${p.my.text} ${v.my.text}${vm.my.marker}`;
-
-        // Pa'O (SVO): S + V + O + ObjMarker + VerbMarker
-        const paoStr = `${s.pao.text} ${v.pao.text} ${o.pao.text} ${p.pao.text} ${vm.pao.marker}`;
-
-        // English (SVO): S + V + O
-        const enStr = `${s.en.text} ${v.en.text} ${o.en.text}`;
-
-        return { my: myStr, pao: paoStr, en: enStr };
-      }
     }
 
-    async function run() {
-      try {
-        const nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
-        const verbs = await fetch('./data/languages/multilingual/verbs.json').then(r => r.json());
-        const particles = await fetch('./data/languages/multilingual/particles.json').then(r => r.json());
-        const verbMarkers = await fetch('./data/languages/multilingual/verb-markers.json').then(r => r.json());
+    const engine = new SyntaxEngine();
 
-        const realizer = new ParticleGrammarRealizer();
+    function renderOutput() {
+      const s = document.getElementById('subjInput').value || '-';
+      const v = document.getElementById('verbInput').value || '-';
+      const o = document.getElementById('objInput').value || '-';
+      const p = document.getElementById('particleInput').value;
 
-        // 1. Nominalization Example (လုပ် + ခြင်း)
-        const nomRes = realizer.realizeNominalization(verbs["V001"], verbMarkers["VM001"]);
+      const res = engine.parse(s, v, o, p);
 
-        // 2. Full Sentence Example (စာအုပ်ကို ယူပါ)
-        const sentenceRes = realizer.realizeSentence("N001", "V001", "N002", "P003", "VM003", { nouns, verbs, particles, verbMarkers });
-
-        document.getElementById('output').innerHTML = `
-          <div class="card my">
-            <div class="lang-header">
-              <b>၁။ နာမ်ပြုကြိယာပုဒ် (Nominalizer Test)</b>
-            </div>
-            <pre>မြန်မာ: ${nomRes.my}</pre>
-            <pre>ပအိုဝ်း: ${nomRes.pao}</pre>
-            <pre>English: ${nomRes.en}</pre>
+      document.getElementById('output').innerHTML = `
+        <div class="card pao">
+          <div class="lang-header">
+            <b>၁။ ပအိုဝ်းဘာသာ (Pa'O)</b>
+            <span class="badge">${res.pao.order}</span>
           </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.pao.pattern}</p>
+          <pre>${res.pao.text}</pre>
+        </div>
 
-          <div class="card pao">
-            <div class="lang-header">
-              <b>၂။ ဝိဘတ်ပါသော ဝါကျအပြည့်အစုံ (Full Particle Sentence)</b>
-            </div>
-            <pre>မြန်မာ (SOV): ${sentenceRes.my}</pre>
-            <pre>ပအိုဝ်း (SVO): ${sentenceRes.pao}</pre>
-            <pre>English (SVO): ${sentenceRes.en}</pre>
+        <div class="card my">
+          <div class="lang-header">
+            <b>၂။ မြန်မာဘာသာ (Myanmar)</b>
+            <span class="badge">${res.my.order}</span>
           </div>
-        `;
-      } catch (err) {
-        document.getElementById('output').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-      }
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.my.pattern}</p>
+          <pre>${res.my.text}</pre>
+        </div>
+
+        <div class="card en">
+          <div class="lang-header">
+            <b>၃။ အင်္ဂလိပ်ဘာသာ (English)</b>
+            <span class="badge">${res.en.order}</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.en.pattern}</p>
+          <pre>${res.en.text}</pre>
+        </div>
+      `;
     }
 
-    run();
+    // Initial Load & Event Listener
+    document.getElementById('parseBtn').addEventListener('click', renderOutput);
+    renderOutput();
   </script>
 </body>
 </html>

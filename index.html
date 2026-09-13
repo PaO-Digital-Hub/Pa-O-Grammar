@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trilingual Grammar Interactive Tester</title>
+  <title>Interactive Trilingual Grammar Engine</title>
   <style>
     :root {
       --bg-color: #0b0f19;
       --card-bg: rgba(23, 31, 51, 0.7);
-      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.1);
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
       --accent-pao: #10b981;
       --accent-my: #f59e0b;
       --accent-en: #3b82f6;
-      --input-bg: #121829;
     }
 
     body {
@@ -26,99 +25,106 @@
       justify-content: center;
     }
 
-    .container { max-width: 900px; width: 100%; }
-    header { text-align: center; margin-bottom: 25px; }
+    .container { max-width: 850px; width: 100%; }
     
+    header { text-align: center; margin-bottom: 25px; }
     h1 {
       font-size: 2.2rem;
       background: linear-gradient(135deg, #a7f3d0, #3b82f6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
     }
 
-    /* Interactive Input Panel */
-    .input-card {
+    /* Search Box Styles */
+    .search-box {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 20px;
       margin-bottom: 25px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
     .input-group {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
-    label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    input, select {
-      background: var(--input-bg);
+    input[type="text"] {
+      flex: 1;
+      background: #050811;
       border: 1px solid var(--card-border);
       border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text-main);
-      font-size: 0.95rem;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 1rem;
       outline: none;
-      transition: border-color 0.2s;
     }
 
-    input:focus, select:focus {
-      border-color: var(--accent-en);
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
     }
 
-    button.btn-parse {
-      width: 100%;
-      background: linear-gradient(135deg, #10b981, #3b82f6);
+    button {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 12px;
-      color: #fff;
-      font-weight: bold;
-      font-size: 1rem;
+      padding: 12px 24px;
+      font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s;
     }
 
-    button.btn-parse:hover { opacity: 0.9; }
+    button:hover { opacity: 0.9; }
 
-    /* Results Layout */
+    .quick-tags {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .tag-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      padding: 4px 12px;
+      color: #d1d5db;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .tag-btn:hover { background: rgba(255,255,255,0.15); }
+
+    /* Results Cards */
     .card {
       background: var(--card-bg);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 18px;
       margin-bottom: 15px;
     }
 
-    .lang-header {
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
       border-bottom: 1px solid var(--card-border);
-      padding-bottom: 8px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .badge {
       font-size: 0.75rem;
-      padding: 3px 10px;
-      border-radius: 20px;
+      padding: 4px 10px;
+      border-radius: 4px;
       font-weight: bold;
     }
 
@@ -131,7 +137,7 @@
       padding: 14px;
       border-radius: 8px;
       color: #e5e7eb;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       margin: 0;
       white-space: pre-wrap;
     }
@@ -142,38 +148,21 @@
   <div class="container">
     <header>
       <h1>Multilingual Grammar Engine</h1>
-      <p style="color: var(--text-muted);">Interactive Linguistic Sandbox (Pa'O • Myanmar • English)</p>
+      <p style="color: var(--text-muted);">စကားလုံးရိုက်ထည့်၍ သဒ္ဒါဖွဲ့စည်းပုံ (SVO/SOV) စမ်းသပ်စစ်ဆေးရန်</p>
     </header>
 
-    <!-- Interactive Input Control -->
-    <div class="input-card">
-      <div class="form-grid">
-        <div class="input-group">
-          <label>Subject (ကတ္တား)</label>
-          <input type="text" id="subjInput" value="ခွေ / ကျွန်တော် / I">
-        </div>
-
-        <div class="input-group">
-          <label>Verb (ကြိယာ)</label>
-          <input type="text" id="verbInput" value="အံႏ / စားသည် / eat">
-        </div>
-
-        <div class="input-group">
-          <label>Object (ကံ)</label>
-          <input type="text" id="objInput" value="ဒဲဉ် / ထမင်း / rice">
-        </div>
-
-        <div class="input-group">
-          <label>Object Particle (ကံဝိဘတ်)</label>
-          <select id="particleInput">
-            <option value="NONE">None (မပါပါ)</option>
-            <option value="ACCUSATIVE">ကို / ယို (Accusative)</option>
-            <option value="TOPIC">သည် / နဝ်ꩻ (Topic)</option>
-          </select>
-        </div>
+    <!-- Interactive Search Bar Section -->
+    <div class="search-box">
+      <div class="input-group">
+        <input type="text" id="searchInput" placeholder="စကားလုံး ရိုက်ထည့်ပါ (ဥပမာ- ခွေ, စားသည်, rice, N001)...">
+        <button id="searchBtn">စစ်ဆေးမည်</button>
       </div>
-
-      <button class="btn-parse" id="parseBtn">Analyze & Transform Syntax</button>
+      <div class="quick-tags">
+        <span>နမူနာများ:</span>
+        <button class="tag-btn" onclick="quickSearch('ခွေ')">ခွေ (Pa'O)</button>
+        <button class="tag-btn" onclick="quickSearch('ထမင်း')">ထမင်း (Myanmar)</button>
+        <button class="tag-btn" onclick="quickSearch('eat')">eat (English)</button>
+      </div>
     </div>
 
     <!-- Output Container -->
@@ -181,75 +170,95 @@
   </div>
 
   <script type="module">
-    class SyntaxEngine {
-      parse(subj, verb, obj, particle) {
-        // Particle Resolution mapping
-        let myPart = particle === 'ACCUSATIVE' ? 'ကို' : (particle === 'TOPIC' ? 'သည်' : '');
-        let paoPart = particle === 'ACCUSATIVE' ? 'ယို' : (particle === 'TOPIC' ? 'နဝ်ꩻ' : '');
+    let lexicons = { nouns: {}, verbs: {}, particles: {} };
 
-        return {
-          pao: {
-            order: "SVO",
-            pattern: "[S] Subject → [V] Verb → [O] Object + [P] Particle",
-            text: `${subj} ${verb} ${obj} ${paoPart}`.trim()
-          },
-          my: {
-            order: "SOV",
-            pattern: "[S] Subject → [O] Object + [P] Particle → [V] Verb",
-            text: `${subj} ${obj}${myPart} ${verb}`.trim()
-          },
-          en: {
-            order: "SVO",
-            pattern: "[S] Subject → [V] Verb → [O] Object",
-            text: `${subj} ${verb} ${obj}`.trim()
-          }
-        };
+    // 1. Data Fetcher from Database JSON
+    async function loadLexicons() {
+      try {
+        lexicons.nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
+        lexicons.verbs = await fetch('./data/languages/multilingual/verbs.json').then(r => r.json());
+        lexicons.particles = await fetch('./data/languages/multilingual/particles.json').then(r => r.json());
+      } catch (err) {
+        console.error("Lexicon database path error", err);
       }
     }
 
-    const engine = new SyntaxEngine();
+    // 2. Multilingual Search Engine
+    function searchWord(keyword) {
+      keyword = keyword.trim().toLowerCase();
+      if (!keyword) return null;
 
-    function renderOutput() {
-      const s = document.getElementById('subjInput').value || '-';
-      const v = document.getElementById('verbInput').value || '-';
-      const o = document.getElementById('objInput').value || '-';
-      const p = document.getElementById('particleInput').value;
+      const allEntries = { ...lexicons.nouns, ...lexicons.verbs, ...lexicons.particles };
+      
+      for (const [id, entry] of Object.entries(allEntries)) {
+        if (
+          id.toLowerCase() === keyword ||
+          entry.pao?.text === keyword ||
+          entry.my?.text === keyword ||
+          entry.en?.text?.toLowerCase() === keyword
+        ) {
+          return { id, ...entry };
+        }
+      }
+      return null;
+    }
 
-      const res = engine.parse(s, v, o, p);
+    // 3. UI Realizer Render
+    function handleSearch() {
+      const inputVal = document.getElementById('searchInput').value;
+      const result = searchWord(inputVal);
+
+      if (!result) {
+        document.getElementById('output').innerHTML = `
+          <div class="card" style="border-color: #ef4444;">
+            <p style="color: #ef4444; margin: 0;">❌ "${inputVal}" အတွက် ဒေတာဘေ့စ်ထဲတွင် စကားလုံးမတွေ့ရှိပါ။ အခြားစကားလုံး စမ်းသပ်ကြည့်ပါ။</p>
+          </div>`;
+        return;
+      }
 
       document.getElementById('output').innerHTML = `
         <div class="card pao">
-          <div class="lang-header">
+          <div class="card-header">
             <b>၁။ ပအိုဝ်းဘာသာ (Pa'O)</b>
-            <span class="badge">${res.pao.order}</span>
+            <span class="badge">SVO Pattern</span>
           </div>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.pao.pattern}</p>
-          <pre>${res.pao.text}</pre>
+          <p><b>သဒ္ဒါအမျိုးအစား:</b> ${result.pos || result.type}</p>
+          <pre>စကားလုံး: ${result.pao?.text || result.pao?.marker || '-'}</pre>
         </div>
 
         <div class="card my">
-          <div class="lang-header">
+          <div class="card-header">
             <b>၂။ မြန်မာဘာသာ (Myanmar)</b>
-            <span class="badge">${res.my.order}</span>
+            <span class="badge">SOV Pattern</span>
           </div>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.my.pattern}</p>
-          <pre>${res.my.text}</pre>
+          <p><b>သဒ္ဒါအမျိုးအစား:</b> ${result.pos || result.type}</p>
+          <pre>စကားလုံး: ${result.my?.text || result.my?.marker || '-'}</pre>
         </div>
 
         <div class="card en">
-          <div class="lang-header">
+          <div class="card-header">
             <b>၃။ အင်္ဂလိပ်ဘာသာ (English)</b>
-            <span class="badge">${res.en.order}</span>
+            <span class="badge">SVO Pattern</span>
           </div>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.en.pattern}</p>
-          <pre>${res.en.text}</pre>
+          <p><b>သဒ္ဒါအမျိုးအစား:</b> ${result.pos || result.type}</p>
+          <pre>Word: ${result.en?.text || result.en?.marker || '-'}</pre>
         </div>
       `;
     }
 
-    // Initial Load & Event Listener
-    document.getElementById('parseBtn').addEventListener('click', renderOutput);
-    renderOutput();
+    // Event Listeners
+    document.getElementById('searchBtn').addEventListener('click', handleSearch);
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    window.quickSearch = function(word) {
+      document.getElementById('searchInput').value = word;
+      handleSearch();
+    };
+
+    // Initialize Engine
+    loadLexicons();
   </script>
 </body>
 </html>

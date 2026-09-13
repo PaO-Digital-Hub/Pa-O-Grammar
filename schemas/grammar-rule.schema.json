@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GrammarRule",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "pattern": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["id", "pattern"]
+}

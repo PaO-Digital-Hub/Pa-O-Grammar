@@ -1,0 +1,11 @@
+{
+  "code": "en",
+  "name": "English",
+  "script": "Latin",
+  "wordOrder": "SVO",
+  "headDirectionality": "initial",
+  "features": {
+    "proDrop": false,
+    "caseMarkers": false
+  }
+}

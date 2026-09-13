@@ -1,140 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="blk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pa'O Grammar Engine Studio</title>
+  <title>Trilingual Grammar Engine</title>
   <style>
     :root {
       --bg-color: #0b0f19;
-      --card-bg: #111827;
-      --accent-color: #10b981;
-      --accent-glow: rgba(16, 185, 129, 0.2);
+      --card-bg: rgba(23, 31, 51, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
-      --border-color: #1f2937;
-      --code-bg: #030712;
-      --header-bg: #1f2937;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      --accent-pao: #10b981;
+      --accent-my: #f59e0b;
+      --accent-en: #3b82f6;
+      --code-bg: #050811;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
-      padding: 24px;
-      line-height: 1.5;
+      margin: 0;
+      padding: 30px 15px;
+      display: flex;
+      justify-content: center;
     }
 
     .container {
-      max-width: 1000px;
-      margin: 0 auto;
+      max-width: 850px;
+      width: 100%;
     }
 
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+      margin-bottom: 30px;
     }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent-color);
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #a7f3d0, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+      margin-bottom: 15px;
+    }
+
+    .lang-title {
+      font-size: 1.25rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      background-color: var(--accent-glow);
-      color: var(--accent-color);
-      border: 1px solid var(--accent-color);
-      border-radius: 9999px;
+    .badge {
       font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent-color);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-color);
-    }
-
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-      gap: 20px;
-    }
-
-    @media (max-width: 600px) {
-      .grid-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-    }
-
-    .card-header {
-      background-color: var(--header-bg);
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
-    .card-body {
-      padding: 16px;
+    /* Color variations for languages */
+    .pao .badge { background: rgba(16, 185, 129, 0.15); color: var(--accent-pao); border: 1px solid var(--accent-pao); }
+    .my .badge { background: rgba(245, 158, 11, 0.15); color: var(--accent-my); border: 1px solid var(--accent-my); }
+    .en .badge { background: rgba(59, 130, 246, 0.15); color: var(--accent-en); border: 1px solid var(--accent-en); }
+
+    .grammar-pattern {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
     }
 
     pre {
-      background-color: var(--code-bg);
-      color: #38bdf8;
-      padding: 12px;
-      border-radius: 6px;
-      font-family: "Fira Code", Monaco, Consolas, monospace;
-      font-size: 0.85rem;
-      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: #e5e7eb;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 1.05rem;
+      margin: 0;
       white-space: pre-wrap;
       word-break: break-word;
-      border: 1px solid var(--border-color);
     }
 
-    .result-text {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #facc15;
-      padding: 8px 0;
-    }
-
-    .loading {
+    #loading {
       text-align: center;
       padding: 40px;
       color: var(--text-muted);
-      font-style: italic;
+      font-size: 1.1rem;
     }
   </style>
 </head>
@@ -142,112 +128,92 @@
 
   <div class="container">
     <header>
-      <h1>
-        <span class="status-dot"></span>
-        Pa'O Grammar Engine
-      </h1>
-      <div class="status-badge">
-        <span class="status-dot"></span> Active Engine
-      </div>
+      <h1>Multilingual Grammar Engine</h1>
+      <p class="subtitle">Unified Lexicon & Syntax Parser (Pa'O • Myanmar • English)</p>
     </header>
 
-    <div id="output" class="loading">
-      Initializing Pipeline & Executing Grammar Engine...
+    <div id="output">
+      <div id="loading">Processing Language Pipelines...</div>
     </div>
   </div>
 
   <script type="module">
-    import { Tokenizer } from './src/core/tokenizer.js';
-    import { POSTagger } from './src/core/pos-tagger.js';
-    import { ConstituencyParser } from './src/syntax/phrase-structure/constituency-parser.js';
-    import { DependencyParser } from './src/syntax/dependency/dependency-parser.js';
-    import { RuleEngine } from './src/grammar-engine/rule-engine.js';
-    import { SemanticParser } from './src/semantics/semantic-parser.js';
-    import { SentenceGenerator } from './src/generation/sentence-generator.js';
+    class MultilingualRealizer {
+      realize(semanticNodes, lexicons) {
+        const subj = lexicons.nouns[semanticNodes.subject];
+        const verb = lexicons.verbs[semanticNodes.verb];
+        const obj = lexicons.nouns[semanticNodes.object];
 
-    async function initEngine() {
-      try {
-        const paoProfile = await fetch('./src/languages/pao/language-profile.json').then(r => r.json());
-        const myProfile = await fetch('./src/languages/myanmar/language-profile.json').then(r => r.json());
-        const paoNouns = await fetch('./data/languages/pao/nouns.json').then(r => r.json());
-        const paoVerbs = await fetch('./data/languages/pao/verbs.json').then(r => r.json());
-
-        const tokenizer = new Tokenizer();
-        const tagger = new POSTagger({ ...paoNouns, ...paoVerbs });
-        const constParser = new ConstituencyParser();
-        const depParser = new DependencyParser();
-        const ruleEngine = new RuleEngine();
-        const semanticParser = new SemanticParser();
-        const generator = new SentenceGenerator();
-
-        const paoText = "ခွေ အံႏ ဒဲန်";
-        const tokens = tokenizer.tokenize(paoText, 'pao');
-        const tagged = tagger.tag(tokens);
-        const constTree = constParser.parse(tagged, paoProfile);
-        const depTopology = depParser.parse(tagged, paoProfile);
-        const semIR = semanticParser.parse(tagged, paoProfile);
-
-        const engineResult = ruleEngine.process(tagged, paoProfile, myProfile);
-        const generatedMyanmarSentence = generator.generate(semIR, myProfile);
-
-        document.getElementById('output').className = "grid-container";
-        document.getElementById('output').innerHTML = `
-          <div class="card">
-            <div class="card-header">1. Input Sentence (Pa'O SVO)</div>
-            <div class="card-body">
-              <div class="result-text">${paoText}</div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">2. Generated Target (Myanmar SOV Alignment)</div>
-            <div class="card-body">
-              <div class="result-text">${generatedMyanmarSentence}</div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">3. POS Tagged Tokens</div>
-            <div class="card-body">
-              <pre>${JSON.stringify(tagged, null, 2)}</pre>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">4. Constituency Tree</div>
-            <div class="card-body">
-              <pre>${JSON.stringify(constTree, null, 2)}</pre>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">5. Dependency Topology</div>
-            <div class="card-body">
-              <pre>${JSON.stringify(depTopology, null, 2)}</pre>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">6. Transformed Tokens</div>
-            <div class="card-body">
-              <pre>${JSON.stringify(engineResult.transformedTokens, null, 2)}</pre>
-            </div>
-          </div>
-        `;
-      } catch (err) {
-        document.getElementById('output').className = "";
-        document.getElementById('output').innerHTML = `
-          <div class="card" style="border-color: #ef4444;">
-            <div class="card-header" style="background-color: #7f1d1d; color: #fca5a5;">Pipeline Failure</div>
-            <div class="card-body">
-              <pre style="color: #fca5a5;">${err.stack || err.message}</pre>
-            </div>
-          </div>
-        `;
+        return {
+          pao: {
+            name: "ပအိုဝ်းဘာသာ (Pa'O)",
+            order: "SVO",
+            pattern: "[S] Subject → [V] Verb → [O] Object",
+            text: `${subj.pao.text} ${verb.pao.text} ${obj.pao.text}`
+          },
+          my: {
+            name: "မြန်မာဘာသာ (Myanmar)",
+            order: "SOV",
+            pattern: "[S] Subject → [O] Object → [V] Verb",
+            text: `${subj.my.text} ${obj.my.text} ${verb.my.text}`
+          },
+          en: {
+            name: "အင်္ဂလိပ်ဘာသာ (English)",
+            order: "SVO",
+            pattern: "[S] Subject → [V] Verb → [O] Object",
+            text: `${subj.en.text} ${verb.en.text} ${obj.en.text}`
+          }
+        };
       }
     }
 
-    initEngine();
+    async function runEngine() {
+      try {
+        const nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
+        const verbs = await fetch('./data/languages/multilingual/verbs.json').then(r => r.json());
+
+        const realizer = new MultilingualRealizer();
+        const inputAST = { subject: "N001", verb: "V001", object: "N002" };
+        const res = realizer.realize(inputAST, { nouns, verbs });
+
+        document.getElementById('output').innerHTML = `
+          <div class="card pao">
+            <div class="card-header">
+              <div class="lang-title">${res.pao.name}</div>
+              <span class="badge">${res.pao.order}</span>
+            </div>
+            <div class="grammar-pattern"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.pao.pattern}</div>
+            <pre>${res.pao.text}</pre>
+          </div>
+
+          <div class="card my">
+            <div class="card-header">
+              <div class="lang-title">${res.my.name}</div>
+              <span class="badge">${res.my.order}</span>
+            </div>
+            <div class="grammar-pattern"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.my.pattern}</div>
+            <pre>${res.my.text}</pre>
+          </div>
+
+          <div class="card en">
+            <div class="card-header">
+              <div class="lang-title">${res.en.name}</div>
+              <span class="badge">${res.en.order}</span>
+            </div>
+            <div class="grammar-pattern"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.en.pattern}</div>
+            <pre>${res.en.text}</pre>
+          </div>
+        `;
+      } catch (err) {
+        document.getElementById('output').innerHTML = `
+          <div class="card" style="border-color: #ef4444;">
+            <h3 style="color: #ef4444; margin-top: 0;">Lexicon Error</h3>
+            <p>${err.message}</p>
+          </div>`;
+      }
+    }
+
+    runEngine();
   </script>
 </body>
 </html>

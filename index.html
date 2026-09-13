@@ -5,12 +5,12 @@
   <title>Advanced Multilingual Grammar Engine</title>
   <style>
     body { font-family: monospace; background: #121212; color: #00ff66; padding: 20px; }
-    pre { background: #1e1e1e; padding: 15px; border-radius: 5px; color: #fff; }
+    pre { background: #1e1e1e; padding: 15px; border-radius: 5px; color: #fff; white-space: pre-wrap; }
     h2 { color: #00e1ff; }
   </style>
 </head>
 <body>
-  <h1>Pa'O Grammar</h1>
+  <h1>Pa'O Grammar Engine</h1>
   <div id="output">Processing Pipeline...</div>
 
   <script type="module">
@@ -21,60 +21,53 @@
     import { RuleEngine } from './src/grammar-engine/rule-engine.js';
     import { SemanticParser } from './src/semantics/semantic-parser.js';
     import { SentenceGenerator } from './src/generation/sentence-generator.js';
-    
-    import paoProfile from './src/languages/pao/language-profile.json' assert { type: 'json' };
-    import myProfile from './src/languages/myanmar/language-profile.json' assert { type: 'json' };
-    import paoNouns from './data/languages/pao/nouns.json' assert { type: 'json' };
-    import paoVerbs from './data/languages/pao/verbs.json' assert { type: 'json' };
-    
-    import { runTests } from './tests/cross-lingual/cross-lingual.test.js';
 
-    // Initialize Modules
-    const tokenizer = new Tokenizer();
-    const tagger = new POSTagger({ ...paoNouns, ...paoVerbs });
-    const constParser = new ConstituencyParser();
-    const depParser = new DependencyParser();
-    const ruleEngine = new RuleEngine();
-    const semanticParser = new SemanticParser();
-    const generator = new SentenceGenerator();
+    async function initEngine() {
+      try {
+        // Fetch JSON files safely (Fixes import assertion errors)
+        const paoProfile = await fetch('./src/languages/pao/language-profile.json').then(r => r.json());
+        const myProfile = await fetch('./src/languages/myanmar/language-profile.json').then(r => r.json());
+        const paoNouns = await fetch('./data/languages/pao/nouns.json').then(r => r.json());
+        const paoVerbs = await fetch('./data/languages/pao/verbs.json').then(r => r.json());
 
-    // 1. Process Pa'O SVO Sentence
-    const paoText = "ခွေ အံႏ ဒဲန်";
-    const tokens = tokenizer.tokenize(paoText, 'pao');
-    const tagged = tagger.tag(tokens);
-    const constTree = constParser.parse(tagged, paoProfile);
-    const depTopology = depParser.parse(tagged, paoProfile);
-    const semIR = semanticParser.parse(tagged, paoProfile);
+        const tokenizer = new Tokenizer();
+        const tagger = new POSTagger({ ...paoNouns, ...paoVerbs });
+        const constParser = new ConstituencyParser();
+        const depParser = new DependencyParser();
+        const ruleEngine = new RuleEngine();
+        const semanticParser = new SemanticParser();
+        const generator = new SentenceGenerator();
 
-    // 2. Transform Pa'O (SVO) -> Myanmar (SOV)
-    const engineResult = ruleEngine.process(tagged, paoProfile, myProfile);
-    const generatedMyanmarSentence = generator.generate(semIR, myProfile);
+        const paoText = "ခွေ အံႏ ဒဲန်";
+        const tokens = tokenizer.tokenize(paoText, 'pao');
+        const tagged = tagger.tag(tokens);
+        const constTree = constParser.parse(tagged, paoProfile);
+        const depTopology = depParser.parse(tagged, paoProfile);
+        const semIR = semanticParser.parse(tagged, paoProfile);
 
-    document.getElementById('output').innerHTML = `
-      <h2>1. Input Sentence (Pa'O SVO)</h2>
-      <pre>${paoText}</pre>
+        const engineResult = ruleEngine.process(tagged, paoProfile, myProfile);
+        const generatedMyanmarSentence = generator.generate(semIR, myProfile);
 
-      <h2>2. POS Tagged Tokens</h2>
-      <pre>${JSON.stringify(tagged, null, 2)}</pre>
+        document.getElementById('output').innerHTML = `
+          <h2>1. Input Sentence (Pa'O SVO)</h2>
+          <pre>${paoText}</pre>
 
-      <h2>3. Constituency Parse Tree</h2>
-      <pre>${JSON.stringify(constTree, null, 2)}</pre>
+          <h2>2. POS Tagged Tokens</h2>
+          <pre>${JSON.stringify(tagged, null, 2)}</pre>
 
-      <h2>4. Dependency Topology</h2>
-      <pre>${JSON.stringify(depTopology, null, 2)}</pre>
+          <h2>3. Transformed Tokens (Pa'O SVO -> Myanmar SOV)</h2>
+          <pre>${JSON.stringify(engineResult.transformedTokens, null, 2)}</pre>
 
-      <h2>5. Semantic Intermediate Representation (IR)</h2>
-      <pre>${JSON.stringify(semIR, null, 2)}</pre>
+          <h2>4. Generated Sentence</h2>
+          <pre>${generatedMyanmarSentence}</pre>
+        `;
+      } catch (err) {
+        document.getElementById('output').innerHTML = `<h2 style="color:red;">Error: ${err.message}</h2><p>Please check Console inspection for detail path issues.</p>`;
+        console.error(err);
+      }
+    }
 
-      <h2>6. Transformed Tokens (Pa'O SVO -> Myanmar SOV Order)</h2>
-      <pre>${JSON.stringify(engineResult.transformedTokens, null, 2)}</pre>
-
-      <h2>7. Generated Surface Sentence (SOV Alignment)</h2>
-      <pre>${generatedMyanmarSentence}</pre>
-    `;
-
-    // Run Integration Tests
-    runTests();
+    initEngine();
   </script>
 </body>
 </html>

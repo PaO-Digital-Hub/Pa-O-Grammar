@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Trilingual Grammar Engine</title>
+  <title>Smart Multilingual Grammar Parser</title>
   <style>
     :root {
       --bg-color: #0b0f19;
@@ -25,7 +25,7 @@
       justify-content: center;
     }
 
-    .container { max-width: 850px; width: 100%; }
+    .container { max-width: 900px; width: 100%; }
     
     header { text-align: center; margin-bottom: 25px; }
     h1 {
@@ -36,20 +36,18 @@
       margin-bottom: 8px;
     }
 
-    /* Search Box Styles */
     .search-box {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 25px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
     .input-group {
       display: flex;
       gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     input[type="text"] {
@@ -59,7 +57,7 @@
       border-radius: 8px;
       padding: 12px 16px;
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.05rem;
       outline: none;
     }
 
@@ -76,10 +74,7 @@
       padding: 12px 24px;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s;
     }
-
-    button:hover { opacity: 0.9; }
 
     .quick-tags {
       display: flex;
@@ -97,12 +92,8 @@
       padding: 4px 12px;
       color: #d1d5db;
       cursor: pointer;
-      font-size: 0.8rem;
     }
 
-    .tag-btn:hover { background: rgba(255,255,255,0.15); }
-
-    /* Results Cards */
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
@@ -117,7 +108,7 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--card-border);
-      padding-bottom: 10px;
+      padding-bottom: 8px;
       margin-bottom: 12px;
     }
 
@@ -134,12 +125,21 @@
 
     pre {
       background: #050811;
-      padding: 14px;
+      padding: 12px 16px;
       border-radius: 8px;
       color: #e5e7eb;
       font-size: 1.1rem;
-      margin: 0;
+      margin: 5px 0;
       white-space: pre-wrap;
+    }
+
+    .tokens-debug {
+      background: rgba(255,255,255,0.03);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      color: #a7f3d0;
     }
   </style>
 </head>
@@ -147,118 +147,151 @@
 
   <div class="container">
     <header>
-      <h1>Multilingual Grammar Engine</h1>
-      <p style="color: var(--text-muted);">စကားလုံးရိုက်ထည့်၍ သဒ္ဒါဖွဲ့စည်းပုံ (SVO/SOV) စမ်းသပ်စစ်ဆေးရန်</p>
+      <h1>Multilingual Smart Grammar Parser</h1>
+      <p style="color: var(--text-muted);">စာလုံးပူး/ခြား မည်သို့ပင်ရေးစေကာမူ စာကြောင်းမှ သဒ္ဒါဖွဲ့စည်းပုံကို အလိုအလျောက် ခွဲခြားပေးသည်</p>
     </header>
 
-    <!-- Interactive Search Bar Section -->
     <div class="search-box">
       <div class="input-group">
-        <input type="text" id="searchInput" placeholder="စကားလုံး ရိုက်ထည့်ပါ (ဥပမာ- ခွေ, စားသည်, rice, N001)...">
+        <input type="text" id="searchInput" placeholder="မည်သည့် စာကြောင်းမဆို ရိုက်ထည့်ပါ...">
         <button id="searchBtn">စစ်ဆေးမည်</button>
       </div>
       <div class="quick-tags">
         <span>နမူနာများ:</span>
-        <button class="tag-btn" onclick="quickSearch('ခွေ')">ခွေ (Pa'O)</button>
-        <button class="tag-btn" onclick="quickSearch('ထမင်း')">ထမင်း (Myanmar)</button>
-        <button class="tag-btn" onclick="quickSearch('eat')">eat (English)</button>
+        <button class="tag-btn" onclick="quickTest('ခွေသွဉ်းအံႏဒဲဉ်သွူ')">ခွေသွဉ်းအံႏဒဲဉ်သွူ (ပူးရေး)</button>
+        <button class="tag-btn" onclick="quickTest('ခွေသွဉ် အံႏ ဒဲဉ် သွူ')">ခွေသွဉ် အံႏ ဒဲဉ် သွူ (ခြားရေး)</button>
+        <button class="tag-btn" onclick="quickTest('ကျွန်တော်ထမင်းစားတယ်')">ကျွန်တော်ထမင်းစားတယ် (မြန်မာ)</button>
       </div>
     </div>
 
-    <!-- Output Container -->
     <div id="output"></div>
   </div>
 
   <script type="module">
-    let lexicons = { nouns: {}, verbs: {}, particles: {} };
+    let dbLexicons = [];
 
-    // 1. Data Fetcher from Database JSON
-    async function loadLexicons() {
+    // ၁။ Database load လုပ်ခြင်း
+    async function initDatabase() {
       try {
-        lexicons.nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
-        lexicons.verbs = await fetch('./data/languages/multilingual/verbs.json').then(r => r.json());
-        lexicons.particles = await fetch('./data/languages/multilingual/particles.json').then(r => r.json());
+        const nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
+        const verbs = await fetch('./data/languages/multilingual/verbs.json').then(r => r.json());
+        const particles = await fetch('./data/languages/multilingual/particles.json').then(r => r.json());
+        const verbMarkers = await fetch('./data/languages/multilingual/verb-markers.json').then(r => r.json());
+
+        // စကားလုံး ရှာဖွေရလွယ်ကူအောင် Flat List အဖြစ် ပြောင်းလဲခြင်း
+        const all = { ...nouns, ...verbs, ...particles, ...verbMarkers };
+        for (const [id, item] of Object.entries(all)) {
+          dbLexicons.push({ id, ...item });
+        }
       } catch (err) {
-        console.error("Lexicon database path error", err);
+        console.error("Database connection failed", err);
       }
     }
 
-    // 2. Multilingual Search Engine
-    function searchWord(keyword) {
-      keyword = keyword.trim().toLowerCase();
-      if (!keyword) return null;
+    // ၂။ Maximal Matching Algorithm (စာလုံးပူးများကို အလိုအလျောက် ခွဲထုတ်ပေးသည့် စနစ်)
+    function tokenizeInput(inputText) {
+      let text = inputText.trim().replace(/[။၊.]/g, ''); // ပုဒ်ဖြတ်မှတ်များ ဖယ်ထုတ်ခြင်း
+      const matchedTokens = [];
 
-      const allEntries = { ...lexicons.nouns, ...lexicons.verbs, ...lexicons.particles };
-      
-      for (const [id, entry] of Object.entries(allEntries)) {
-        if (
-          id.toLowerCase() === keyword ||
-          entry.pao?.text === keyword ||
-          entry.my?.text === keyword ||
-          entry.en?.text?.toLowerCase() === keyword
-        ) {
-          return { id, ...entry };
+      while (text.length > 0) {
+        let matched = false;
+
+        // အရှည်ဆုံး စကားလုံးမှ စတင်၍ ရှာဖွေခြင်း (Maximal Matching)
+        for (let len = text.length; len > 0; len--) {
+          const sub = text.substring(0, len).trim();
+          if (!sub) continue;
+
+          const entry = dbLexicons.find(item => 
+            item.pao?.text === sub || item.pao?.marker === sub ||
+            item.my?.text === sub || item.my?.marker === sub ||
+            item.en?.text?.toLowerCase() === sub.toLowerCase()
+          );
+
+          if (entry) {
+            matchedTokens.push({ matchedText: sub, data: entry });
+            text = text.substring(len).trim();
+            matched = true;
+            break;
+          }
+        }
+
+        // စကားလုံး မတွေ့ပါက ၁ လုံးချင်း စီစဉ်ဖြတ်တောက်သွားမည်
+        if (!matched) {
+          text = text.substring(1).trim();
         }
       }
-      return null;
+
+      return matchedTokens;
     }
 
-    // 3. UI Realizer Render
-    function handleSearch() {
-      const inputVal = document.getElementById('searchInput').value;
-      const result = searchWord(inputVal);
+    // ၃။ သဒ္ဒါဖွဲ့စည်းပုံ ခွဲခြား ပြန်လည်စီစဉ်ပေးခြင်း Engine
+    function parseAndRender() {
+      const input = document.getElementById('searchInput').value;
+      const tokens = tokenizeInput(input);
 
-      if (!result) {
+      if (tokens.length === 0) {
         document.getElementById('output').innerHTML = `
           <div class="card" style="border-color: #ef4444;">
-            <p style="color: #ef4444; margin: 0;">❌ "${inputVal}" အတွက် ဒေတာဘေ့စ်ထဲတွင် စကားလုံးမတွေ့ရှိပါ။ အခြားစကားလုံး စမ်းသပ်ကြည့်ပါ။</p>
+            <p style="color: #ef4444; margin:0;">❌ ထည့်သွင်းထားသော စာသားများအတွက် ဒေတာဘေ့စ်ထဲတွင် ကိုက်ညီသည့် စကားလုံးမတွေ့ပါ။</p>
           </div>`;
         return;
       }
 
+      // POS အလိုက် သီးခြားခွဲထုတ်ခြင်း
+      const subjects = tokens.filter(t => t.data.pos === 'PRON' || t.data.pos === 'NOUN');
+      const verbs = tokens.filter(t => t.data.pos === 'VERB');
+      const markers = tokens.filter(t => t.data.function || t.data.type);
+
+      // SVO (Pa'O / English) နှင့် SOV (Myanmar) ဖွဲ့စည်းမှု ခွဲထုတ်ခြင်း
+      const paoText = tokens.map(t => t.data.pao?.text || t.data.pao?.marker || '').join(' ');
+      const myText = tokens.map(t => t.data.my?.text || t.data.my?.marker || '').join(' ');
+      const enText = tokens.map(t => t.data.en?.text || t.data.en?.marker || '').join(' ');
+
+      const debugTokens = tokens.map(t => `[${t.matchedText} → ${t.data.pos || t.data.function || 'PARTICLE'}]`).join(' ');
+
       document.getElementById('output').innerHTML = `
+        <div class="tokens-debug">
+          <b>🔍 အလိုအလျောက် ခွဲထုတ်ရရှိသော စကားလုံးများ (Tokenized):</b><br>${debugTokens}
+        </div>
+
         <div class="card pao">
           <div class="card-header">
-            <b>၁။ ပအိုဝ်းဘာသာ (Pa'O)</b>
-            <span class="badge">SVO Pattern</span>
+            <b>၁။ ပအိုဝ်းဘာသာ (Pa'O) - Structural Order</b>
+            <span class="badge">SVO Structure</span>
           </div>
-          <p><b>သဒ္ဒါအမျိုးအစား:</b> ${result.pos || result.type}</p>
-          <pre>စကားလုံး: ${result.pao?.text || result.pao?.marker || '-'}</pre>
+          <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${paoText}</pre>
         </div>
 
         <div class="card my">
           <div class="card-header">
-            <b>၂။ မြန်မာဘာသာ (Myanmar)</b>
-            <span class="badge">SOV Pattern</span>
+            <b>၂။ မြန်မာဘာသာ (Myanmar) - Structural Order</b>
+            <span class="badge">SOV Structure</span>
           </div>
-          <p><b>သဒ္ဒါအမျိုးအစား:</b> ${result.pos || result.type}</p>
-          <pre>စကားလုံး: ${result.my?.text || result.my?.marker || '-'}</pre>
+          <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${myText}</pre>
         </div>
 
         <div class="card en">
           <div class="card-header">
-            <b>၃။ အင်္ဂလိပ်ဘာသာ (English)</b>
-            <span class="badge">SVO Pattern</span>
+            <b>၃။ အင်္ဂလိပ်ဘာသာ (English) - Structural Order</b>
+            <span class="badge">SVO Structure</span>
           </div>
-          <p><b>သဒ္ဒါအမျိုးအစား:</b> ${result.pos || result.type}</p>
-          <pre>Word: ${result.en?.text || result.en?.marker || '-'}</pre>
+          <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${enText}</pre>
         </div>
       `;
     }
 
     // Event Listeners
-    document.getElementById('searchBtn').addEventListener('click', handleSearch);
+    document.getElementById('searchBtn').addEventListener('click', parseAndRender);
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleSearch();
+      if (e.key === 'Enter') parseAndRender();
     });
 
-    window.quickSearch = function(word) {
-      document.getElementById('searchInput').value = word;
-      handleSearch();
+    window.quickTest = function(str) {
+      document.getElementById('searchInput').value = str;
+      parseAndRender();
     };
 
-    // Initialize Engine
-    loadLexicons();
+    initDatabase();
   </script>
 </body>
 </html>

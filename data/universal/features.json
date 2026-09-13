@@ -1,0 +1,6 @@
+{
+  "Aspect": ["Imp", "Perf", "Prog"],
+  "Case": ["Nom", "Acc", "Dat"],
+  "Number": ["Sing", "Plur"],
+  "Person": ["1", "2", "3"]
+}

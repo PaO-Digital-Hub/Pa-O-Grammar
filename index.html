@@ -26,7 +26,6 @@
     }
 
     .container { max-width: 900px; width: 100%; }
-    
     header { text-align: center; margin-bottom: 25px; }
     h1 {
       font-size: 2.2rem;
@@ -148,19 +147,18 @@
   <div class="container">
     <header>
       <h1>Multilingual Smart Grammar Parser</h1>
-      <p style="color: var(--text-muted);">စာလုံးပူး/ခြား မည်သို့ပင်ရေးစေကာမူ စာကြောင်းမှ သဒ္ဒါဖွဲ့စည်းပုံကို အလိုအလျောက် ခွဲခြားပေးသည်</p>
+      <p style="color: var(--text-muted);">သဒ္ဒါအလိုက် SVO / SOV စနစ်မှန်အတိုင်း အလိုအလျောက် ပြန်လည်စီစဉ်ပေးသည့် စနစ်</p>
     </header>
 
     <div class="search-box">
       <div class="input-group">
-        <input type="text" id="searchInput" placeholder="မည်သည့် စာကြောင်းမဆို ရိုက်ထည့်ပါ...">
+        <input type="text" id="searchInput" placeholder="စကားလုံး သို့မဟုတ် ဝါကျ ရိုက်ထည့်ပါ...">
         <button id="searchBtn">စစ်ဆေးမည်</button>
       </div>
       <div class="quick-tags">
         <span>နမူနာများ:</span>
-        <button class="tag-btn" onclick="quickTest('ခွေသွဉ်းအံႏဒဲဉ်သွူ')">ခွေသွဉ်းအံႏဒဲဉ်သွူ (ပူးရေး)</button>
-        <button class="tag-btn" onclick="quickTest('ခွေသွဉ် အံႏ ဒဲဉ် သွူ')">ခွေသွဉ် အံႏ ဒဲဉ် သွူ (ခြားရေး)</button>
-        <button class="tag-btn" onclick="quickTest('ကျွန်တော်ထမင်းစားတယ်')">ကျွန်တော်ထမင်းစားတယ် (မြန်မာ)</button>
+        <button class="tag-btn" onclick="quickTest('အံႏ ဒဲန် သွူ')">အံႏ ဒဲန် သွူ (Pa'O SVO)</button>
+        <button class="tag-btn" onclick="quickTest('စား ထမင်း သည်')">စား ထမင်း သည် (အစီအစဉ်မှား)</button>
       </div>
     </div>
 
@@ -170,7 +168,6 @@
   <script type="module">
     let dbLexicons = [];
 
-    // ၁။ Database load လုပ်ခြင်း
     async function initDatabase() {
       try {
         const nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
@@ -178,25 +175,22 @@
         const particles = await fetch('./data/languages/multilingual/particles.json').then(r => r.json());
         const verbMarkers = await fetch('./data/languages/multilingual/verb-markers.json').then(r => r.json());
 
-        // စကားလုံး ရှာဖွေရလွယ်ကူအောင် Flat List အဖြစ် ပြောင်းလဲခြင်း
         const all = { ...nouns, ...verbs, ...particles, ...verbMarkers };
         for (const [id, item] of Object.entries(all)) {
           dbLexicons.push({ id, ...item });
         }
       } catch (err) {
-        console.error("Database connection failed", err);
+        console.error("Database connection error", err);
       }
     }
 
-    // ၂။ Maximal Matching Algorithm (စာလုံးပူးများကို အလိုအလျောက် ခွဲထုတ်ပေးသည့် စနစ်)
     function tokenizeInput(inputText) {
-      let text = inputText.trim().replace(/[။၊.]/g, ''); // ပုဒ်ဖြတ်မှတ်များ ဖယ်ထုတ်ခြင်း
+      let text = inputText.trim().replace(/[။၊.]/g, '');
       const matchedTokens = [];
 
       while (text.length > 0) {
         let matched = false;
 
-        // အရှည်ဆုံး စကားလုံးမှ စတင်၍ ရှာဖွေခြင်း (Maximal Matching)
         for (let len = text.length; len > 0; len--) {
           const sub = text.substring(0, len).trim();
           if (!sub) continue;
@@ -208,23 +202,43 @@
           );
 
           if (entry) {
-            matchedTokens.push({ matchedText: sub, data: entry });
+            matchedTokens.push(entry);
             text = text.substring(len).trim();
             matched = true;
             break;
           }
         }
 
-        // စကားလုံး မတွေ့ပါက ၁ လုံးချင်း စီစဉ်ဖြတ်တောက်သွားမည်
-        if (!matched) {
-          text = text.substring(1).trim();
-        }
+        if (!matched) text = text.substring(1).trim();
       }
 
       return matchedTokens;
     }
 
-    // ၃။ သဒ္ဒါဖွဲ့စည်းပုံ ခွဲခြား ပြန်လည်စီစဉ်ပေးခြင်း Engine
+    // သဒ္ဒါအစဉ်အတိုင်း (Grammar Rule) ပြန်လည် စီစဉ်ပေးသည့် Engine
+    function reorderTokens(tokens, targetLang, targetStructure) {
+      const subjects = tokens.filter(t => t.pos === 'PRON' || (t.pos === 'NOUN' && t.id.startsWith('N001')));
+      const objects = tokens.filter(t => t.pos === 'NOUN' && !t.id.startsWith('N001'));
+      const verbs = tokens.filter(t => t.pos === 'VERB');
+      const particles = tokens.filter(t => t.type || t.function);
+
+      let ordered = [];
+
+      if (targetStructure === 'SOV') {
+        // မြန်မာ (SOV): Subject + Object + Verb + Verb Marker
+        ordered = [...subjects, ...objects, ...verbs, ...particles];
+      } else {
+        // ပအိုဝ်း / အင်္ဂလိပ် (SVO): Subject + Verb + Object + Marker
+        ordered = [...subjects, ...verbs, ...objects, ...particles];
+      }
+
+      // စကားလုံး ပြန်ထုတ်ပေးခြင်း
+      return ordered
+        .map(t => t[targetLang]?.text || t[targetLang]?.marker || '')
+        .filter(Boolean)
+        .join(' ');
+    }
+
     function parseAndRender() {
       const input = document.getElementById('searchInput').value;
       const tokens = tokenizeInput(input);
@@ -232,31 +246,20 @@
       if (tokens.length === 0) {
         document.getElementById('output').innerHTML = `
           <div class="card" style="border-color: #ef4444;">
-            <p style="color: #ef4444; margin:0;">❌ ထည့်သွင်းထားသော စာသားများအတွက် ဒေတာဘေ့စ်ထဲတွင် ကိုက်ညီသည့် စကားလုံးမတွေ့ပါ။</p>
+            <p style="color: #ef4444; margin:0;">❌ ဒေတာဘေ့စ်ထဲတွင် မတွေ့ပါ။</p>
           </div>`;
         return;
       }
 
-      // POS အလိုက် သီးခြားခွဲထုတ်ခြင်း
-      const subjects = tokens.filter(t => t.data.pos === 'PRON' || t.data.pos === 'NOUN');
-      const verbs = tokens.filter(t => t.data.pos === 'VERB');
-      const markers = tokens.filter(t => t.data.function || t.data.type);
-
-      // SVO (Pa'O / English) နှင့် SOV (Myanmar) ဖွဲ့စည်းမှု ခွဲထုတ်ခြင်း
-      const paoText = tokens.map(t => t.data.pao?.text || t.data.pao?.marker || '').join(' ');
-      const myText = tokens.map(t => t.data.my?.text || t.data.my?.marker || '').join(' ');
-      const enText = tokens.map(t => t.data.en?.text || t.data.en?.marker || '').join(' ');
-
-      const debugTokens = tokens.map(t => `[${t.matchedText} → ${t.data.pos || t.data.function || 'PARTICLE'}]`).join(' ');
+      // ဘာသာစကားအလိုက် သဒ္ဒါပုံစံအမှန်သို့ Re-order လုပ်ယူခြင်း
+      const paoText = reorderTokens(tokens, 'pao', 'SVO');
+      const myText = reorderTokens(tokens, 'my', 'SOV');
+      const enText = reorderTokens(tokens, 'en', 'SVO');
 
       document.getElementById('output').innerHTML = `
-        <div class="tokens-debug">
-          <b>🔍 အလိုအလျောက် ခွဲထုတ်ရရှိသော စကားလုံးများ (Tokenized):</b><br>${debugTokens}
-        </div>
-
         <div class="card pao">
           <div class="card-header">
-            <b>၁။ ပအိုဝ်းဘာသာ (Pa'O) - Structural Order</b>
+            <b>၁။ ပအိုဝ်းဘာသာ (Pa'O)</b>
             <span class="badge">SVO Structure</span>
           </div>
           <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${paoText}</pre>
@@ -264,7 +267,7 @@
 
         <div class="card my">
           <div class="card-header">
-            <b>၂။ မြန်မာဘာသာ (Myanmar) - Structural Order</b>
+            <b>၂။ မြန်မာဘာသာ (Myanmar)</b>
             <span class="badge">SOV Structure</span>
           </div>
           <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${myText}</pre>
@@ -272,7 +275,7 @@
 
         <div class="card en">
           <div class="card-header">
-            <b>၃။ အင်္ဂလိပ်ဘာသာ (English) - Structural Order</b>
+            <b>၃။ အင်္ဂလိပ်ဘာသာ (English)</b>
             <span class="badge">SVO Structure</span>
           </div>
           <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${enText}</pre>
@@ -280,7 +283,6 @@
       `;
     }
 
-    // Event Listeners
     document.getElementById('searchBtn').addEventListener('click', parseAndRender);
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') parseAndRender();

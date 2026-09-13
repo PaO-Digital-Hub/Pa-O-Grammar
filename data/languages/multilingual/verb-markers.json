@@ -1,0 +1,30 @@
+{
+  "VM001": {
+    "function": "NOMINALIZER",
+    "description": "လုပ် + ခြင်း (ကြိယာမှ နာမ်ပြုခြင်း)",
+    "pao": { "marker": "ထာꩻ", "position": "BEFORE_VERB" },
+    "my": { "marker": "ခြင်း", "position": "AFTER_VERB" },
+    "en": { "suffix": "ing", "position": "ATTACH_VERB_SUFFIX" }
+  },
+  "VM002": {
+    "function": "FINITE_ENDING",
+    "description": "လုပ် + သည် (ရိုးရိုး ကြိယာအဆုံးသတ်)",
+    "pao": { "marker": "သွူ", "position": "AFTER_VERB" },
+    "my": { "marker": "သည်", "position": "AFTER_VERB" },
+    "en": { "suffix": "s/es", "position": "ATTACH_VERB_SUFFIX" }
+  },
+  "VM003": {
+    "function": "POLITE_FINITE_ENDING",
+    "description": "လုပ် + ပါ + တယ် (ယဉ်ကျေးပြောဆိုပုံ ကြိယာအဆုံးသတ်)",
+    "pao": { "marker": "ဩ", "position": "AFTER_VERB" },
+    "my": { "marker": "ပါ တယ်", "position": "AFTER_VERB" },
+    "en": { "marker": "please", "position": "BEFORE_VERB" }
+  },
+  "VM004": {
+    "function": "ATTRIBUTIVE_RELATIVE",
+    "description": "လုပ် + သော (နာမ်ကို အထူးပြုသော ကြိယာပုံစံ)",
+    "pao": { "marker": "က", "position": "BEFORE_VERB" },
+    "my": { "marker": "သော", "position": "AFTER_VERB" },
+    "en": { "marker": "that", "position": "BEFORE_VERB" }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "P001": {
+    "type": "SUBJECT_MARKER",
+    "pao": { "text": "နဝ်ꩻ", "position": "AFTER_NOUN" },
+    "my": { "text": "က", "position": "AFTER_NOUN" },
+    "en": { "text": "", "position": "NONE" }
+  },
+  "P002": {
+    "type": "TOPIC_MARKER",
+    "pao": { "text": "နဝ်ꩻ", "position": "AFTER_NOUN" },
+    "my": { "text": "သည်", "position": "AFTER_NOUN" },
+    "en": { "text": "", "position": "NONE" }
+  },
+  "P003": {
+    "type": "OBJECT_MARKER",
+    "pao": { "text": "ယို", "position": "AFTER_NOUN" },
+    "my": { "text": "ကို", "position": "AFTER_NOUN" },
+    "en": { "text": "", "position": "NONE" }
+  },
+  "P004": {
+    "type": "INCLUSIVE_PARTICLE",
+    "pao": { "text": "လဲ့", "position": "AFTER_NOUN" },
+    "my": { "text": "လည်း", "position": "AFTER_NOUN" },
+    "en": { "text": "also", "position": "BEFORE_VERB" }
+  },
+  "P005": {
+    "type": "EMPHATIC_PARTICLE",
+    "pao": { "text": "ဒျာႏ", "position": "AFTER_NOUN" },
+    "my": { "text": "ပဲ", "position": "AFTER_NOUN" },
+    "en": { "text": "only", "position": "BEFORE_NOUN" }
+  }
+}

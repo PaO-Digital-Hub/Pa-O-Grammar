@@ -1,0 +1,14 @@
+{
+  "N001": {
+    "pos": "PRON",
+    "pao": { "text": "ခွေသွဉ်း", "roman": "khwe-sorn" },
+    "my": { "text": "ကျွန်တော်", "roman": "kyan-taw" },
+    "en": { "text": "I'am", "roman": "I'm" }
+  },
+  "N002": {
+    "pos": "NOUN",
+    "pao": { "text": "ဒဲဉ်", "roman": "daen" },
+    "my": { "text": "ထမင်း", "roman": "hta-min" },
+    "en": { "text": "rice", "roman": "rice" }
+  }
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Multilingual Grammar Parser</title>
+  <title>Trilingual Grammar & Particle Engine</title>
   <style>
     :root {
       --bg-color: #0b0f19;
@@ -28,11 +28,10 @@
     .container { max-width: 900px; width: 100%; }
     header { text-align: center; margin-bottom: 25px; }
     h1 {
-      font-size: 2.2rem;
+      font-size: 2rem;
       background: linear-gradient(135deg, #a7f3d0, #3b82f6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
     }
 
     .search-box {
@@ -56,13 +55,8 @@
       border-radius: 8px;
       padding: 12px 16px;
       color: #fff;
-      font-size: 1.05rem;
+      font-size: 1rem;
       outline: none;
-    }
-
-    input[type="text"]:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
     }
 
     button {
@@ -72,24 +66,6 @@
       border-radius: 8px;
       padding: 12px 24px;
       font-weight: 600;
-      cursor: pointer;
-    }
-
-    .quick-tags {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .tag-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--card-border);
-      border-radius: 15px;
-      padding: 4px 12px;
-      color: #d1d5db;
       cursor: pointer;
     }
 
@@ -131,34 +107,20 @@
       margin: 5px 0;
       white-space: pre-wrap;
     }
-
-    .tokens-debug {
-      background: rgba(255,255,255,0.03);
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      font-size: 0.9rem;
-      color: #a7f3d0;
-    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header>
-      <h1>Multilingual Smart Grammar Parser</h1>
-      <p style="color: var(--text-muted);">သဒ္ဒါအလိုက် SVO / SOV စနစ်မှန်အတိုင်း အလိုအလျောက် ပြန်လည်စီစဉ်ပေးသည့် စနစ်</p>
+      <h1>Multilingual Grammar Engine</h1>
+      <p style="color: var(--text-muted);">Particles & Verb-Markers သီးခြားစီ ခွဲခြားစစ်ဆေးသည့် စနစ်</p>
     </header>
 
     <div class="search-box">
       <div class="input-group">
-        <input type="text" id="searchInput" placeholder="စကားလုံး သို့မဟုတ် ဝါကျ ရိုက်ထည့်ပါ...">
+        <input type="text" id="searchInput" placeholder="ဥပမာ - ကျွန်တော် ထမင်း ကို စား သည် ...">
         <button id="searchBtn">စစ်ဆေးမည်</button>
-      </div>
-      <div class="quick-tags">
-        <span>နမူနာများ:</span>
-        <button class="tag-btn" onclick="quickTest('အံႏ ဒဲန် သွူ')">အံႏ ဒဲန် သွူ (Pa'O SVO)</button>
-        <button class="tag-btn" onclick="quickTest('စား ထမင်း သည်')">စား ထမင်း သည် (အစီအစဉ်မှား)</button>
       </div>
     </div>
 
@@ -180,7 +142,7 @@
           dbLexicons.push({ id, ...item });
         }
       } catch (err) {
-        console.error("Database connection error", err);
+        console.error("Database connection failed", err);
       }
     }
 
@@ -215,28 +177,47 @@
       return matchedTokens;
     }
 
-    // သဒ္ဒါအစဉ်အတိုင်း (Grammar Rule) ပြန်လည် စီစဉ်ပေးသည့် Engine
-    function reorderTokens(tokens, targetLang, targetStructure) {
-      const subjects = tokens.filter(t => t.pos === 'PRON' || (t.pos === 'NOUN' && t.id.startsWith('N001')));
-      const objects = tokens.filter(t => t.pos === 'NOUN' && !t.id.startsWith('N001'));
-      const verbs = tokens.filter(t => t.pos === 'VERB');
-      const particles = tokens.filter(t => t.type || t.function);
+    // Grammar Re-ordering Engine (Particles နှင့် Verb Markers များကို တိကျစွာ ခွဲခြားခြင်း)
+    function buildGrammarSentence(tokens, lang) {
+      const subj = tokens.find(t => t.pos === 'PRON' || (t.pos === 'NOUN' && t.id.startsWith('N001')));
+      const obj = tokens.find(t => t.pos === 'NOUN' && !t.id.startsWith('N001'));
+      const verb = tokens.find(t => t.pos === 'VERB');
+      
+      // Particles (ဝိဘတ်များ) နှင့် Verb Markers (ကြိယာအဆုံးသတ်များ) ကို သီးခြားစီ ခွဲထုတ်ခြင်း
+      const objParticle = tokens.find(t => t.category === 'OBJECT_MARKER' || t.category === 'SUBJECT_MARKER');
+      const verbMarker = tokens.find(t => t.function || t.pos === 'VERB_MARKER');
 
-      let ordered = [];
+      const getWord = (item) => item ? (item[lang]?.text || item[lang]?.marker || '') : '';
 
-      if (targetStructure === 'SOV') {
-        // မြန်မာ (SOV): Subject + Object + Verb + Verb Marker
-        ordered = [...subjects, ...objects, ...verbs, ...particles];
-      } else {
-        // ပအိုဝ်း / အင်္ဂလိပ် (SVO): Subject + Verb + Object + Marker
-        ordered = [...subjects, ...verbs, ...objects, ...particles];
+      // ဘာသာစကားအလိုက် သဒ္ဒါကျအောင် စီစဉ်ခြင်း
+      if (lang === 'my') {
+        // မြန်မာ (SOV): [Subject] + [Object + Object Marker] + [Verb + Verb Marker]
+        const s = getWord(subj);
+        const o = getWord(obj);
+        const op = getWord(objParticle);
+        const v = getWord(verb);
+        const vm = getWord(verbMarker);
+
+        return `${s} ${o}${op} ${v}${vm}`.trim();
+      } 
+      else if (lang === 'pao') {
+        // ပအိုဝ်း (SVO): [Subject] + [Verb] + [Object + Object Marker] + [Verb Marker]
+        const s = getWord(subj);
+        const v = getWord(verb);
+        const o = getWord(obj);
+        const op = getWord(objParticle);
+        const vm = getWord(verbMarker);
+
+        return `${s} ${v} ${o} ${op} ${vm}`.trim();
+      } 
+      else {
+        // အင်္ဂလိပ် (SVO): [Subject] + [Verb] + [Object]
+        const s = getWord(subj);
+        const v = getWord(verb);
+        const o = getWord(obj);
+
+        return `${s} ${v} ${o}`.trim();
       }
-
-      // စကားလုံး ပြန်ထုတ်ပေးခြင်း
-      return ordered
-        .map(t => t[targetLang]?.text || t[targetLang]?.marker || '')
-        .filter(Boolean)
-        .join(' ');
     }
 
     function parseAndRender() {
@@ -244,54 +225,30 @@
       const tokens = tokenizeInput(input);
 
       if (tokens.length === 0) {
-        document.getElementById('output').innerHTML = `
-          <div class="card" style="border-color: #ef4444;">
-            <p style="color: #ef4444; margin:0;">❌ ဒေတာဘေ့စ်ထဲတွင် မတွေ့ပါ။</p>
-          </div>`;
+        document.getElementById('output').innerHTML = `<p style="color:red;">❌ မတွေ့ပါ။</p>`;
         return;
       }
 
-      // ဘာသာစကားအလိုက် သဒ္ဒါပုံစံအမှန်သို့ Re-order လုပ်ယူခြင်း
-      const paoText = reorderTokens(tokens, 'pao', 'SVO');
-      const myText = reorderTokens(tokens, 'my', 'SOV');
-      const enText = reorderTokens(tokens, 'en', 'SVO');
-
       document.getElementById('output').innerHTML = `
         <div class="card pao">
-          <div class="card-header">
-            <b>၁။ ပအိုဝ်းဘာသာ (Pa'O)</b>
-            <span class="badge">SVO Structure</span>
-          </div>
-          <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${paoText}</pre>
+          <div class="card-header"><b>၁။ ပအိုဝ်းဘာသာ (Pa'O)</b><span class="badge">SVO</span></div>
+          <pre>${buildGrammarSentence(tokens, 'pao')}</pre>
         </div>
 
         <div class="card my">
-          <div class="card-header">
-            <b>၂။ မြန်မာဘာသာ (Myanmar)</b>
-            <span class="badge">SOV Structure</span>
-          </div>
-          <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${myText}</pre>
+          <div class="card-header"><b>၂။ မြန်မာဘာသာ (Myanmar)</b><span class="badge">SOV</span></div>
+          <pre>${buildGrammarSentence(tokens, 'my')}</pre>
         </div>
 
         <div class="card en">
-          <div class="card-header">
-            <b>၃။ အင်္ဂလိပ်ဘာသာ (English)</b>
-            <span class="badge">SVO Structure</span>
-          </div>
-          <pre>ခွဲထုတ်ရရှိသော ဝါကျအမှန်: ${enText}</pre>
+          <div class="card-header"><b>၃။ အင်္ဂလိပ်ဘာသာ (English)</b><span class="badge">SVO</span></div>
+          <pre>${buildGrammarSentence(tokens, 'en')}</pre>
         </div>
       `;
     }
 
     document.getElementById('searchBtn').addEventListener('click', parseAndRender);
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') parseAndRender();
-    });
-
-    window.quickTest = function(str) {
-      document.getElementById('searchInput').value = str;
-      parseAndRender();
-    };
+    document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') parseAndRender(); });
 
     initDatabase();
   </script>

@@ -1,0 +1,11 @@
+{
+  "code": "pao",
+  "name": "Pa'O",
+  "script": "Myanmar",
+  "wordOrder": "SVO",
+  "headDirectionality": "initial",
+  "features": {
+    "proDrop": false,
+    "caseMarkers": true
+  }
+}

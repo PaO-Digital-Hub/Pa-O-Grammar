@@ -2,16 +2,159 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Advanced Multilingual Grammar Engine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pa'O Grammar Engine Studio</title>
   <style>
-    body { font-family: monospace; background: #121212; color: #00ff66; padding: 20px; }
-    pre { background: #1e1e1e; padding: 15px; border-radius: 5px; color: #fff; white-space: pre-wrap; }
-    h2 { color: #00e1ff; }
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #111827;
+      --accent-color: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border-color: #1f2937;
+      --code-bg: #030712;
+      --header-bg: #1f2937;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background-color: var(--accent-glow);
+      color: var(--accent-color);
+      border: 1px solid var(--accent-color);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-color);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-color);
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-header {
+      background-color: var(--header-bg);
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: #38bdf8;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: "Fira Code", Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid var(--border-color);
+    }
+
+    .result-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #facc15;
+      padding: 8px 0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
-  <h1>Pa'O Grammar Engine</h1>
-  <div id="output">Processing Pipeline...</div>
+
+  <div class="container">
+    <header>
+      <h1>
+        <span class="status-dot"></span>
+        Pa'O Grammar Engine
+      </h1>
+      <div class="status-badge">
+        <span class="status-dot"></span> Active Engine
+      </div>
+    </header>
+
+    <div id="output" class="loading">
+      Initializing Pipeline & Executing Grammar Engine...
+    </div>
+  </div>
 
   <script type="module">
     import { Tokenizer } from './src/core/tokenizer.js';
@@ -24,7 +167,6 @@
 
     async function initEngine() {
       try {
-        // Fetch JSON files safely (Fixes import assertion errors)
         const paoProfile = await fetch('./src/languages/pao/language-profile.json').then(r => r.json());
         const myProfile = await fetch('./src/languages/myanmar/language-profile.json').then(r => r.json());
         const paoNouns = await fetch('./data/languages/pao/nouns.json').then(r => r.json());
@@ -48,22 +190,60 @@
         const engineResult = ruleEngine.process(tagged, paoProfile, myProfile);
         const generatedMyanmarSentence = generator.generate(semIR, myProfile);
 
+        document.getElementById('output').className = "grid-container";
         document.getElementById('output').innerHTML = `
-          <h2>1. Input Sentence (Pa'O SVO)</h2>
-          <pre>${paoText}</pre>
+          <div class="card">
+            <div class="card-header">1. Input Sentence (Pa'O SVO)</div>
+            <div class="card-body">
+              <div class="result-text">${paoText}</div>
+            </div>
+          </div>
 
-          <h2>2. POS Tagged Tokens</h2>
-          <pre>${JSON.stringify(tagged, null, 2)}</pre>
+          <div class="card">
+            <div class="card-header">2. Generated Target (Myanmar SOV Alignment)</div>
+            <div class="card-body">
+              <div class="result-text">${generatedMyanmarSentence}</div>
+            </div>
+          </div>
 
-          <h2>3. Transformed Tokens (Pa'O SVO -> Myanmar SOV)</h2>
-          <pre>${JSON.stringify(engineResult.transformedTokens, null, 2)}</pre>
+          <div class="card">
+            <div class="card-header">3. POS Tagged Tokens</div>
+            <div class="card-body">
+              <pre>${JSON.stringify(tagged, null, 2)}</pre>
+            </div>
+          </div>
 
-          <h2>4. Generated Sentence</h2>
-          <pre>${generatedMyanmarSentence}</pre>
+          <div class="card">
+            <div class="card-header">4. Constituency Tree</div>
+            <div class="card-body">
+              <pre>${JSON.stringify(constTree, null, 2)}</pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">5. Dependency Topology</div>
+            <div class="card-body">
+              <pre>${JSON.stringify(depTopology, null, 2)}</pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">6. Transformed Tokens</div>
+            <div class="card-body">
+              <pre>${JSON.stringify(engineResult.transformedTokens, null, 2)}</pre>
+            </div>
+          </div>
         `;
       } catch (err) {
-        document.getElementById('output').innerHTML = `<h2 style="color:red;">Error: ${err.message}</h2><p>Please check Console inspection for detail path issues.</p>`;
-        console.error(err);
+        document.getElementById('output').className = "";
+        document.getElementById('output').innerHTML = `
+          <div class="card" style="border-color: #ef4444;">
+            <div class="card-header" style="background-color: #7f1d1d; color: #fca5a5;">Pipeline Failure</div>
+            <div class="card-body">
+              <pre style="color: #fca5a5;">${err.stack || err.message}</pre>
+            </div>
+          </div>
+        `;
       }
     }
 

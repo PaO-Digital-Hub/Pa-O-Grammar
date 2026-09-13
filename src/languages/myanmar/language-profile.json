@@ -1,0 +1,11 @@
+{
+  "code": "my",
+  "name": "Myanmar",
+  "script": "Myanmar",
+  "wordOrder": "SOV",
+  "headDirectionality": "final",
+  "features": {
+    "proDrop": true,
+    "caseMarkers": true
+  }
+}

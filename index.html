@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="blk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trilingual Grammar Engine</title>
+  <title>Trilingual Particle & Grammar Engine</title>
   <style>
     :root {
       --bg-color: #0b0f19;
@@ -14,113 +14,62 @@
       --accent-pao: #10b981;
       --accent-my: #f59e0b;
       --accent-en: #3b82f6;
-      --code-bg: #050811;
     }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
-      margin: 0;
       padding: 30px 15px;
       display: flex;
       justify-content: center;
     }
 
-    .container {
-      max-width: 850px;
-      width: 100%;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
+    .container { max-width: 900px; width: 100%; }
+    header { text-align: center; margin-bottom: 25px; }
     h1 {
-      font-size: 2.2rem;
+      font-size: 2rem;
       background: linear-gradient(135deg, #a7f3d0, #3b82f6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-    }
-
-    p.subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
     }
 
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 12px;
+      border-radius: 12px;
+      padding: 18px;
       margin-bottom: 15px;
     }
 
-    .lang-title {
-      font-size: 1.25rem;
-      font-weight: 600;
+    .lang-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
     }
 
     .badge {
       font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
     }
 
-    /* Color variations for languages */
-    .pao .badge { background: rgba(16, 185, 129, 0.15); color: var(--accent-pao); border: 1px solid var(--accent-pao); }
-    .my .badge { background: rgba(245, 158, 11, 0.15); color: var(--accent-my); border: 1px solid var(--accent-my); }
-    .en .badge { background: rgba(59, 130, 246, 0.15); color: var(--accent-en); border: 1px solid var(--accent-en); }
-
-    .grammar-pattern {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
+    .pao .badge { background: rgba(16, 185, 129, 0.2); color: var(--accent-pao); border: 1px solid var(--accent-pao); }
+    .my .badge { background: rgba(245, 158, 11, 0.2); color: var(--accent-my); border: 1px solid var(--accent-my); }
+    .en .badge { background: rgba(59, 130, 246, 0.2); color: var(--accent-en); border: 1px solid var(--accent-en); }
 
     pre {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 14px 16px;
+      background: #050811;
+      padding: 12px;
+      border-radius: 6px;
       color: #e5e7eb;
-      font-family: 'Consolas', 'Courier New', monospace;
       font-size: 1.05rem;
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    #loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-      font-size: 1.1rem;
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -128,92 +77,94 @@
 
   <div class="container">
     <header>
-      <h1>Multilingual Grammar Engine</h1>
-      <p class="subtitle">Unified Lexicon & Syntax Parser (Pa'O • Myanmar • English)</p>
+      <h1>Trilingual Grammar & Particle Engine</h1>
+      <p style="color: var(--text-muted);">Functional Markers & Functional Suffix Resolution</p>
     </header>
 
-    <div id="output">
-      <div id="loading">Processing Language Pipelines...</div>
-    </div>
+    <div id="output">Loading Engine...</div>
   </div>
 
   <script type="module">
-    class MultilingualRealizer {
-      realize(semanticNodes, lexicons) {
-        const subj = lexicons.nouns[semanticNodes.subject];
-        const verb = lexicons.verbs[semanticNodes.verb];
-        const obj = lexicons.nouns[semanticNodes.object];
+    class ParticleGrammarRealizer {
+      // Nominalizer Transformer (လုပ် + ခြင်း)
+      realizeNominalization(verbEntry, markerEntry) {
+        const myVerb = verbEntry.my.text; // လုပ်
+        const myMarker = markerEntry.my.marker; // ခြင်း
+        
+        const paoVerb = verbEntry.pao.text; // မာꩻ
+        const paoMarker = markerEntry.pao.marker; // ထာꩻ
+        
+        const enVerb = verbEntry.en.text; // do
+        const enSuffix = markerEntry.en.suffix; // ing
 
         return {
-          pao: {
-            name: "ပအိုဝ်းဘာသာ (Pa'O)",
-            order: "SVO",
-            pattern: "[S] Subject → [V] Verb → [O] Object",
-            text: `${subj.pao.text} ${verb.pao.text} ${obj.pao.text}`
-          },
-          my: {
-            name: "မြန်မာဘာသာ (Myanmar)",
-            order: "SOV",
-            pattern: "[S] Subject → [O] Object → [V] Verb",
-            text: `${subj.my.text} ${obj.my.text} ${verb.my.text}`
-          },
-          en: {
-            name: "အင်္ဂလိပ်ဘာသာ (English)",
-            order: "SVO",
-            pattern: "[S] Subject → [V] Verb → [O] Object",
-            text: `${subj.en.text} ${verb.en.text} ${obj.en.text}`
-          }
+          my: `${myVerb}${myMarker}`,                          // လုပ်ခြင်း (AFTER_VERB)
+          pao: `${paoMarker} ${paoVerb}`,                      // ထာꩻ မာꩻ (BEFORE_VERB)
+          en: `${enVerb}${enSuffix}`                           // doing (ATTACH_SUFFIX)
         };
+      }
+
+      // Sentence Realizer with Object Markers
+      realizeSentence(subj, verb, obj, objParticle, verbMarker, lexicons) {
+        const s = lexicons.nouns[subj];
+        const v = lexicons.verbs[verb];
+        const o = lexicons.nouns[obj];
+        const p = lexicons.particles[objParticle];
+        const vm = lexicons.verbMarkers[verbMarker];
+
+        // Myanmar (SOV): S + O + ObjMarker + V + VerbMarker
+        const myStr = `${s.my.text} ${o.my.text}${p.my.text} ${v.my.text}${vm.my.marker}`;
+
+        // Pa'O (SVO): S + V + O + ObjMarker + VerbMarker
+        const paoStr = `${s.pao.text} ${v.pao.text} ${o.pao.text} ${p.pao.text} ${vm.pao.marker}`;
+
+        // English (SVO): S + V + O
+        const enStr = `${s.en.text} ${v.en.text} ${o.en.text}`;
+
+        return { my: myStr, pao: paoStr, en: enStr };
       }
     }
 
-    async function runEngine() {
+    async function run() {
       try {
         const nouns = await fetch('./data/languages/multilingual/nouns.json').then(r => r.json());
         const verbs = await fetch('./data/languages/multilingual/verbs.json').then(r => r.json());
+        const particles = await fetch('./data/languages/multilingual/particles.json').then(r => r.json());
+        const verbMarkers = await fetch('./data/languages/multilingual/verb-markers.json').then(r => r.json());
 
-        const realizer = new MultilingualRealizer();
-        const inputAST = { subject: "N001", verb: "V001", object: "N002" };
-        const res = realizer.realize(inputAST, { nouns, verbs });
+        const realizer = new ParticleGrammarRealizer();
+
+        // 1. Nominalization Example (လုပ် + ခြင်း)
+        const nomRes = realizer.realizeNominalization(verbs["V001"], verbMarkers["VM001"]);
+
+        // 2. Full Sentence Example (စာအုပ်ကို ယူပါ)
+        const sentenceRes = realizer.realizeSentence("N001", "V001", "N002", "P003", "VM003", { nouns, verbs, particles, verbMarkers });
 
         document.getElementById('output').innerHTML = `
-          <div class="card pao">
-            <div class="card-header">
-              <div class="lang-title">${res.pao.name}</div>
-              <span class="badge">${res.pao.order}</span>
-            </div>
-            <div class="grammar-pattern"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.pao.pattern}</div>
-            <pre>${res.pao.text}</pre>
-          </div>
-
           <div class="card my">
-            <div class="card-header">
-              <div class="lang-title">${res.my.name}</div>
-              <span class="badge">${res.my.order}</span>
+            <div class="lang-header">
+              <b>၁။ နာမ်ပြုကြိယာပုဒ် (Nominalizer Test)</b>
             </div>
-            <div class="grammar-pattern"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.my.pattern}</div>
-            <pre>${res.my.text}</pre>
+            <pre>မြန်မာ: ${nomRes.my}</pre>
+            <pre>ပအိုဝ်း: ${nomRes.pao}</pre>
+            <pre>English: ${nomRes.en}</pre>
           </div>
 
-          <div class="card en">
-            <div class="card-header">
-              <div class="lang-title">${res.en.name}</div>
-              <span class="badge">${res.en.order}</span>
+          <div class="card pao">
+            <div class="lang-header">
+              <b>၂။ ဝိဘတ်ပါသော ဝါကျအပြည့်အစုံ (Full Particle Sentence)</b>
             </div>
-            <div class="grammar-pattern"><b>ဝါကျ တည်ဆောက်ပုံ:</b> ${res.en.pattern}</div>
-            <pre>${res.en.text}</pre>
+            <pre>မြန်မာ (SOV): ${sentenceRes.my}</pre>
+            <pre>ပအိုဝ်း (SVO): ${sentenceRes.pao}</pre>
+            <pre>English (SVO): ${sentenceRes.en}</pre>
           </div>
         `;
       } catch (err) {
-        document.getElementById('output').innerHTML = `
-          <div class="card" style="border-color: #ef4444;">
-            <h3 style="color: #ef4444; margin-top: 0;">Lexicon Error</h3>
-            <p>${err.message}</p>
-          </div>`;
+        document.getElementById('output').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
       }
     }
 
-    runEngine();
+    run();
   </script>
 </body>
 </html>

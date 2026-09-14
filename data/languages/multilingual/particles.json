@@ -2,7 +2,7 @@
   "P001": {
     "pos": "PARTICLE",
     "category": "SUBJECT_MARKER",
-    "pao": { "text": "နဝ်ꩻ", "position": "AFTER_NOUN" },
+    "pao": { "text": "နောဝ်ꩻ", "position": "AFTER_NOUN" },
     "my": { "text": "က", "position": "AFTER_NOUN" },
     "en": { "text": "", "position": "NONE" }
   },
@@ -16,7 +16,7 @@
   "P003": {
     "pos": "PARTICLE",
     "category": "INCLUSIVE",
-    "pao": { "text": "လဲ့", "position": "AFTER_NOUN" },
+    "pao": { "text": "ယင်း", "position": "AFTER_NOUN" },
     "my": { "text": "လည်း", "position": "AFTER_NOUN" },
     "en": { "text": "also", "position": "BEFORE_VERB" }
   }

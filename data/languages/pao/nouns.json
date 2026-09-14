@@ -1,6 +1,6 @@
 {
   "ခွေ": { "pos": "PRON", "lemma": "ခွေ", "features": { "Person": "1", "Number": "Sing" } },
   "ဝေး": { "pos": "PRON", "lemma": "ဝေး", "features": { "Person": "3", "Number": "Sing" } },
-  "ဒဲန်": { "pos": "NOUN", "lemma": "ဒဲန်" },
+  "ဒဲဉ်": { "pos": "NOUN", "lemma": "ဒဲဉ်" },
   "ထမင်း": { "pos": "NOUN", "lemma": "ထမင်း" }
 }
